@@ -1,0 +1,15 @@
+*.jpg
+*.jpeg
+*.png
+*.zip
+*.tar
+*.pt
+*.pth
+*.ckpt
+*.pyc
+.idea
+*.xml
+*.out
+*.err
+.idea
+*.json

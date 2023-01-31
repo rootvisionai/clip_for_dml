@@ -1,0 +1,20 @@
+run_id: 0
+
+training_path: ./datasets/universal_image_embeddings/train
+eval_path: ./datasets/universal_image_embeddings/eval
+
+preprocessing:
+  image_size: 512
+  color_and_blur: 0.2
+  perspective: 0.2
+
+batch_size: 128
+num_workers: 4
+epochs: 1
+lr: 0.01
+optimizer: AdamW
+lp_k: 0.2
+embedding_size: 64
+number_of_neighbours: 4
+eval_interval: 1
+device: "cuda"
