@@ -1,4 +1,4 @@
-run_id: 0
+run_id: 1
 
 training_path: ./datasets/universal_image_embeddings/train
 eval_path: ./datasets/universal_image_embeddings/eval
@@ -10,10 +10,15 @@ preprocessing:
 
 batch_size: 128
 num_workers: 4
-epochs: 1
+epochs: 30
 lr: 0.01
 optimizer: AdamW
-lp_k: 0.2
+lp:
+  k: 0.2
+  type: "rand" # rand, dropout
+  coeff: 1.2
+  interval: 1
+  max: 0.5
 embedding_size: 64
 number_of_neighbours: 4
 eval_interval: 1

@@ -12,7 +12,7 @@ import os
 
 def pretrain(cfg):
 
-    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp_k}_{cfg.embedding_size}"
+    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp.type}_{cfg.lp.k}_{cfg.embedding_size}"
     resume = os.path.join("checkpoints", resume)
 
     ds_tr = Data(root=cfg.training_path, transform=get_transform(cfg, train=True))
@@ -37,8 +37,8 @@ def pretrain(cfg):
                 loss_function=LinearProjection(
                     normalize=True,
                     nb_classes=ds_tr.nb_classes(),
-                    noise="rand",  # rand, dropout
-                    k=cfg.lp_k,
+                    noise=cfg.lp.type,
+                    k=cfg.lp.k,
                     device=cfg.device
                 ),
                 embedding_size=cfg.embedding_size,
@@ -59,8 +59,6 @@ def pretrain(cfg):
     model.eval()
     model.embedding.train()
 
-    model.criterion.k = 0.3
-
     loss_hist = deque(maxlen=20)
     precisions = [0]
     for epoch in range(last_epoch, cfg.epochs):
@@ -76,6 +74,11 @@ def pretrain(cfg):
             "last_epoch": epoch+1
         }, os.path.join(resume, "ckpt_latest.pth"))
 
+        if (epoch + 1) % cfg.lp.interval == 0:
+            model.criterion.k = cfg.lp.k*cfg.lp.coeff
+            if model.criterion.k>cfg.lp.max:
+                model.criterion.k = cfg.lp.max
+
         if (epoch+1)%cfg.eval_interval==0:
             print("EVALUATING...")
             precision = utils.evaluate_cos(model, dl_ev)[0]
@@ -90,7 +93,7 @@ def pretrain(cfg):
 
 def train_knn(cfg):
 
-    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp_k}_{cfg.embedding_size}"
+    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp.type}_{cfg.lp.k}_{cfg.embedding_size}"
     resume = os.path.join("checkpoints", resume)
 
     if os.path.isfile(os.path.join(resume, "ckpt_ready.pth")):
@@ -148,7 +151,7 @@ def train_knn(cfg):
         torch.save(ckpt, os.path.join(resume, "ckpt_ready.pth"))
 
 def test_package(cfg):
-    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp_k}_{cfg.embedding_size}"
+    resume = f"{cfg.run_id}_{cfg.preprocessing.image_size}_{cfg.run_id}_{cfg.lp.type}_{cfg.lp.k}_{cfg.embedding_size}"
     resume = os.path.join("checkpoints", resume)
 
     # import dataset
